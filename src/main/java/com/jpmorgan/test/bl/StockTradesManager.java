@@ -14,7 +14,7 @@ public class StockTradesManager {
     /** Main data holder for trades */
     private TreeSet<Trade> tradesSet;
 
-    /**
+    /**                                                                t
      * Default constructor.
      */
     public StockTradesManager() {
