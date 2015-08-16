@@ -6,9 +6,7 @@ package com.jpmorgan.test.pojo;
  * @version 1.0 / 11.08.2015
  * @author Radoslav Lozanov
  */
-public class Trade implements Comparable {
-    /** Stock that was traded */
-    private Stock stock;
+public class Trade {
     /** Type of the Trade */
     private TradeType tradeType;
     /** When trade occurred */
@@ -19,34 +17,34 @@ public class Trade implements Comparable {
     private int singlePrice;
     /** Total price of the trade */
     private int totalPrice;
+    /** Dividend for the trade */
+    private int dividend;
+
+    /**
+     * Default constructor
+     */
+    public Trade() {
+        super();
+    }
 
     /**
      * Construct a single Trade with all information needed
      *
-     * @param stock Stock that is traded
      * @param tradeType Type of trade
      * @param dateTime When trade happened
      * @param quantity How many Stocks are sale
      * @param totalPrice Total price of the deal
      */
-    public Trade(Stock stock, TradeType tradeType, long dateTime, int quantity, int totalPrice) {
+    public Trade(TradeType tradeType, long dateTime, int quantity, int totalPrice, int dividend) {
         super();
 
-        this.stock = stock;
         this.tradeType = tradeType;
         this.dateTime = dateTime;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
+        this.dividend = dividend;
 
         this.singlePrice = Math.round((float)totalPrice / (float)quantity);
-    }
-
-    public Stock getStock() {
-        return stock;
-    }
-
-    public void setStock(Stock stock) {
-        this.stock = stock;
     }
 
     public TradeType getTradeType() {
@@ -89,14 +87,12 @@ public class Trade implements Comparable {
         this.totalPrice = totalPrice;
     }
 
-    @Override
-    public int compareTo(Object o) {
-        if (!(o instanceof Trade)) {
-            throw new ClassCastException("Can not compare with different object");
-        }
+    public int getDividend() {
+        return dividend;
+    }
 
-        Trade trade = (Trade)o;
-        return Long.valueOf(this.dateTime).compareTo(trade.getDateTime());
+    public void setDividend(int dividend) {
+        this.dividend = dividend;
     }
 
     @Override
@@ -106,8 +102,7 @@ public class Trade implements Comparable {
         }
 
         Trade trade = (Trade)o;
-        return this.getStock().equals(trade.getStock()) &&
-               this.getDateTime() == trade.getDateTime() &&
+        return this.getDateTime() == trade.getDateTime() &&
                this.getQuantity() == trade.getQuantity() &&
                this.getTotalPrice() == trade.getTotalPrice() &&
                this.getTradeType().equals(trade.getTradeType());

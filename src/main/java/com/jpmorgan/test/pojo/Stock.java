@@ -14,7 +14,6 @@ public class Stock {
     private String symbol;
     /** Symbol hash code - for internal usage (equal and hashCode) */
     private int symbolHashCode;
-
     /** Par value of the stock */
     private int parValue;
 
@@ -72,6 +71,9 @@ public class Stock {
         return symbolHashCode;
     }
 
+    /**
+     * @return Stock symbol hash code - used to retrieve {@link com.jpmorgan.test.bl.StockTradesManager trade manager}
+     */
     @Override
     public int hashCode() {
         return this.getSymbolHashCode();
