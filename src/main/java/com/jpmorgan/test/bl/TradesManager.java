@@ -5,8 +5,10 @@ import com.jpmorgan.test.pojo.StockType;
 import com.jpmorgan.test.pojo.Trade;
 import com.jpmorgan.test.pojo.TradeType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -104,10 +106,10 @@ public class TradesManager {
         switch (stock.getType()) {
             case Preferred:
                 dividendYield = (stock.getFixedDividend() * stock.getParValue()) /
-                                ((float)(lastTrade.getSinglePrice() * 100)); // multiply by 100 as prices are in pennies
+                                ((float)(this.calculateStockPrice(stockSymbol) * 100)); // multiply by 100 as prices are in pennies
                 break;
             default:
-                dividendYield = lastTrade.getDividend() / (float)lastTrade.getSinglePrice();
+                dividendYield = lastTrade.getDividend() / (float)this.calculateStockPrice(stockSymbol);
                 break;
         }
 
@@ -125,7 +127,7 @@ public class TradesManager {
         StockTradesManager stockTradesManager = this.getStockTradesManager(stock);
         Trade lastTrade = stockTradesManager.getLastTrade();
 
-        return lastTrade.getSinglePrice() / (float)lastTrade.getDividend();
+        return this.calculateStockPrice(stockSymbol) / (float)lastTrade.getDividend();
     }
 
     /**
@@ -148,6 +150,39 @@ public class TradesManager {
         }
 
         return (int)(tradePriceAndQuantity / (float)quantity);
+    }
+
+    /**
+     * Calculates GBCE All Shares Index based on Geometric Mean of prices for all stocks
+     * @return Calculated value
+     */
+    public double calculateGBCEAllSharesIndex() {
+        // Get prices from all stocks
+        Lock lock = this.readWriteLock.readLock();
+        List<Integer> stockPricesList = new ArrayList<Integer>();
+        try {
+            lock.lock();
+
+            for (String stockSymbol: this.stocksMap.keySet()) {
+                try {
+                    stockPricesList.add(this.calculateStockPrice(stockSymbol));
+                } catch (StockNotInitializedException e) { // can't happen
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        // calculate geometric mean
+        double gmLog = 0.0d;
+        for (Integer price: stockPricesList) {
+            if (price.intValue() == 0) {
+                return 0;
+            }
+            gmLog += Math.log(price);
+        }
+
+        return Math.exp(gmLog / stockPricesList.size());
     }
 
     /**
