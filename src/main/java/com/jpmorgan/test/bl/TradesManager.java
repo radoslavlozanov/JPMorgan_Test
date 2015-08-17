@@ -91,7 +91,7 @@ public class TradesManager {
     /**
      * Calculates dividend yield for given stock.
      * @param stockSymbol Stock symbol
-     * @return Calculated dividend yield
+     * @return Calculated dividend yield divide by 100 for float value
      * @throws StockNotInitializedException In case that stock doesn't exists
      */
     public int calculateDividendYield(String stockSymbol) throws StockNotInitializedException {
@@ -111,6 +111,20 @@ public class TradesManager {
         }
 
         return dividendYield;
+    }
+
+    /**
+     * Calculate P/E Ratio for given stock
+     * @param stockSymbol Symbol representing the stock
+     * @return Integer P/E Ratio value - divide by 100 for float value
+     * @throws StockNotInitializedException In case that stock doesn't exists
+     */
+    public int calculatePERatio(String stockSymbol) throws StockNotInitializedException {
+        Stock stock = this.getStock(stockSymbol);
+        StockTradesManager stockTradesManager = this.getStockTradesManager(stock);
+        Trade lastTrade = stockTradesManager.getLastTrade();
+
+        return (int)(lastTrade.getSinglePrice() / (float)lastTrade.getDividend());
     }
 
     /**
