@@ -6,6 +6,7 @@ import com.jpmorgan.test.pojo.Trade;
 import com.jpmorgan.test.pojo.TradeType;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -91,22 +92,22 @@ public class TradesManager {
     /**
      * Calculates dividend yield for given stock.
      * @param stockSymbol Stock symbol
-     * @return Calculated dividend yield divide by 100 for float value
+     * @return Calculated dividend yield
      * @throws StockNotInitializedException In case that stock doesn't exists
      */
-    public int calculateDividendYield(String stockSymbol) throws StockNotInitializedException {
-        int dividendYield = 0;
+    public float calculateDividendYield(String stockSymbol) throws StockNotInitializedException {
+        float dividendYield = 0;
         Stock stock = this.getStock(stockSymbol);
         StockTradesManager stockTradesManager = this.getStockTradesManager(stock);
         Trade lastTrade = stockTradesManager.getLastTrade();
 
         switch (stock.getType()) {
             case Preferred:
-                dividendYield = (int)((stock.getFixedDividend() * stock.getParValue()) /
-                                      (float)lastTrade.getSinglePrice());
+                dividendYield = (stock.getFixedDividend() * stock.getParValue()) /
+                                ((float)(lastTrade.getSinglePrice() * 100)); // multiply by 100 as prices are in pennies
                 break;
             default:
-                dividendYield = (int)(lastTrade.getDividend() / (float)lastTrade.getSinglePrice());
+                dividendYield = lastTrade.getDividend() / (float)lastTrade.getSinglePrice();
                 break;
         }
 
@@ -116,15 +117,37 @@ public class TradesManager {
     /**
      * Calculate P/E Ratio for given stock
      * @param stockSymbol Symbol representing the stock
-     * @return Integer P/E Ratio value - divide by 100 for float value
+     * @return P/E Ratio value
      * @throws StockNotInitializedException In case that stock doesn't exists
      */
-    public int calculatePERatio(String stockSymbol) throws StockNotInitializedException {
+    public float calculatePERatio(String stockSymbol) throws StockNotInitializedException {
         Stock stock = this.getStock(stockSymbol);
         StockTradesManager stockTradesManager = this.getStockTradesManager(stock);
         Trade lastTrade = stockTradesManager.getLastTrade();
 
-        return (int)(lastTrade.getSinglePrice() / (float)lastTrade.getDividend());
+        return lastTrade.getSinglePrice() / (float)lastTrade.getDividend();
+    }
+
+    /**
+     * Calculate stock price from all trades in past interval
+     * @param stockSymbol Symbol of the stock
+     * @return Calculated price in pennies
+     * @throws StockNotInitializedException If stock is not found
+     */
+    public int calculateStockPrice(String stockSymbol) throws StockNotInitializedException {
+        Stock stock = this.getStock(stockSymbol);
+        StockTradesManager stockTradesManager = this.getStockTradesManager(stock);
+        Iterator<Trade> tradesIterator = stockTradesManager.getAllTradesInCalcInterval();
+
+        int tradePriceAndQuantity = 0;
+        int quantity = 0;
+        while(tradesIterator.hasNext()) {
+            Trade trade = tradesIterator.next();
+            tradePriceAndQuantity += trade.getTotalPrice() * trade.getQuantity();
+            quantity += quantity;
+        }
+
+        return (int)(tradePriceAndQuantity / (float)quantity);
     }
 
     /**
