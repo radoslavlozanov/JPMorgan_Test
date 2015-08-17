@@ -116,13 +116,13 @@ public class TradesManagerTest {
         this.tradesManager.addTrade(preferredStock.getSymbol(), TradeType.buy, 1, 10000, 1000);
         float dividendYieldCalc = this.tradesManager.calculateDividendYield(preferredStock.getSymbol());
         float dividendYieldExp = (preferredStock.getFixedDividend() * preferredStock.getParValue()) / (float)(100 * 10000);
-        assertTrue(dividendYieldCalc == dividendYieldExp);
+        assertEquals(dividendYieldCalc, dividendYieldExp, 0.0001);
 
         // Test common
         this.tradesManager.addTrade(commonStock.getSymbol(), TradeType.buy, 1, 10000, 1000);
         dividendYieldCalc = this.tradesManager.calculateDividendYield(commonStock.getSymbol());
         dividendYieldExp = 1000/(float)10000;
-        assertTrue(dividendYieldCalc == dividendYieldExp);
+        assertEquals(dividendYieldCalc, dividendYieldExp, 0.0001);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class TradesManagerTest {
         this.tradesManager.addTrade(STOCK_SYMBOLS[0], TradeType.buy, 1, 10000, 1000);
         float peRatioCalc = this.tradesManager.calculatePERatio(STOCK_SYMBOLS[0]);
         float peRatioExp = 10000 / (float)1000;
-        assertTrue(peRatioCalc == peRatioExp);
+        assertEquals(peRatioCalc, peRatioExp, 0.0001);
     }
 
     @Test
