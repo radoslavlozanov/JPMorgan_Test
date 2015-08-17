@@ -61,8 +61,9 @@ public class TradesManager {
      * @param stockSymbol Stock symbol
      * @param stockType Type of the stock
      * @param parValue Par value
+     * @param fixedDividend Fixed dividend
      */
-    public void addOrUpdateStock(String stockSymbol, StockType stockType, int parValue) {
+    public void addOrUpdateStock(String stockSymbol, StockType stockType, int parValue, int fixedDividend) {
         Lock lock = this.readWriteLock.writeLock();
         try {
             lock.lock();
@@ -74,6 +75,7 @@ public class TradesManager {
 
             stock.setType(stockType);
             stock.setParValue(parValue);
+            stock.setFixedDividend(fixedDividend);
 
             this.stocksMap.put(stockSymbol, stock);
         } finally {

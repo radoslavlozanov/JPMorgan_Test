@@ -9,13 +9,14 @@ package com.jpmorgan.test.pojo;
 public class Stock {
     /** Type */
     private StockType type;
-
     /** Representing symbol */
     private String symbol;
     /** Symbol hash code - for internal usage (equal and hashCode) */
     private int symbolHashCode;
     /** Par value of the stock */
     private int parValue;
+    /** Fixed dividend (in percents) - used in case that stock is from {@link StockType#Preferred Preffered} type */
+    private int fixedDividend;
 
     /**
      * @return Type of the Stock
@@ -69,6 +70,21 @@ public class Stock {
      */
     public int getSymbolHashCode() {
         return symbolHashCode;
+    }
+
+    /**
+     * @return Fixed dividend value.
+     */
+    public int getFixedDividend() {
+        return fixedDividend;
+    }
+
+    /**
+     * Set fixed dividend value
+     * @param fixedDividend Value to set
+     */
+    public void setFixedDividend(int fixedDividend) {
+        this.fixedDividend = fixedDividend;
     }
 
     /**
