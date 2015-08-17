@@ -128,7 +128,7 @@ public class TradesManager {
         switch (stock.getType()) {
             case Preferred:
                 dividendYield = ( ((float)stock.getFixedDividend() / 100) * stock.getParValue()) /
-                                ((float)(this.calculateStockPrice(stockSymbol) * 100)); // multiply by 100 as prices are in pennies
+                                ((float)(this.calculateStockPrice(stockSymbol)));
                 break;
             default:
                 dividendYield = lastTrade.getDividend() / (float)this.calculateStockPrice(stockSymbol);
@@ -168,7 +168,7 @@ public class TradesManager {
         while(tradesIterator.hasNext()) {
             Trade trade = tradesIterator.next();
             tradePriceAndQuantity += trade.getTotalPrice() * trade.getQuantity();
-            quantity += quantity;
+            quantity += trade.getQuantity();
         }
 
         return (int)(tradePriceAndQuantity / (float)quantity);
@@ -214,7 +214,7 @@ public class TradesManager {
      * @return Stock
      * @throws StockNotInitializedException Throw exception if stock is not found
      */
-    private Stock getStock(String stockSymbol) throws StockNotInitializedException {
+    public Stock getStock(String stockSymbol) throws StockNotInitializedException {
         Lock lock = this.readWriteLock.readLock();
         Stock stock = null;
         try {
