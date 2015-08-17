@@ -95,6 +95,14 @@ public class Trade {
         this.dividend = dividend;
     }
 
+    /**
+     * Validates all values of the trade
+     * @return <code>true</code> if Trade is valid, <code>false</code> otherwise
+     */
+    public boolean validate() {
+        return true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Trade)) {

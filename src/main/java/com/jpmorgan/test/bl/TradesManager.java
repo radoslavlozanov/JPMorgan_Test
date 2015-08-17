@@ -42,17 +42,22 @@ public class TradesManager {
     /**
      * Add new trade with all needed information
      *
-     * @param stockSymbol Stock symbol
-     * @param tradeType Type of the trade
-     * @param quantity quantity
-     * @param totalPrice total price
-     * @param dividend dividend for the trade
-     * @throws StockNotInitializedException
+     * @param stockSymbol Stock symbol. Cannot be <code>null</code>
+     * @param tradeType Type of the trade. Cannot be <code>null</code>
+     * @param quantity quantity. Must be positive value
+     * @param totalPrice total price. Must be positive value
+     * @param dividend dividend for the trade. Must be positive value
+     * @throws StockNotInitializedException if Stock is not found
+     * @throws RuntimeException if some of the arguments is not valid
      */
     public void addTrade(String stockSymbol, TradeType tradeType, int quantity, int totalPrice, int dividend)
             throws StockNotInitializedException {
-        Stock stock = this.getStock(stockSymbol);
         Trade trade = new Trade(tradeType, System.currentTimeMillis(), quantity, totalPrice, dividend);
+        if (!trade.validate()) {
+            throw new RuntimeException("Invalid argument(s)");
+        }
+
+        Stock stock = this.getStock(stockSymbol);
         StockTradesManager tradesManager = this.getStockTradesManager(stock);
 
         tradesManager.addTrade(trade);
@@ -61,12 +66,29 @@ public class TradesManager {
     /**
      * Adds or updates stock into mem database.
      *
-     * @param stockSymbol Stock symbol
-     * @param stockType Type of the stock
-     * @param parValue Par value
-     * @param fixedDividend Fixed dividend
+     * @param stockSymbol Stock symbol. Cannot be null
+     * @param stockType Type of the stock. Cannot be null
+     * @param parValue Par value. Must be positive value
+     * @param fixedDividend Fixed dividend. In case of {@link StockType#Preferred preferred} type must be positive
      */
     public void addOrUpdateStock(String stockSymbol, StockType stockType, int parValue, int fixedDividend) {
+        // Check input parameters
+        if (stockSymbol == null) {
+            throw new RuntimeException("Stock symbol cannot be null");
+        }
+
+        if (stockType == null) {
+            throw new RuntimeException("Stock type cannot be null");
+        }
+
+        if (StockType.Preferred.equals(stockType) && fixedDividend <= 0) {
+            throw new RuntimeException("Invalid fixed dividend value");
+        }
+
+        if (parValue <= 0) {
+            throw new RuntimeException("Invalid par value");
+        }
+
         Lock lock = this.readWriteLock.writeLock();
         try {
             lock.lock();
@@ -105,7 +127,7 @@ public class TradesManager {
 
         switch (stock.getType()) {
             case Preferred:
-                dividendYield = (stock.getFixedDividend() * stock.getParValue()) /
+                dividendYield = ( ((float)stock.getFixedDividend() / 100) * stock.getParValue()) /
                                 ((float)(this.calculateStockPrice(stockSymbol) * 100)); // multiply by 100 as prices are in pennies
                 break;
             default:
