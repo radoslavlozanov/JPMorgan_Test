@@ -50,7 +50,7 @@ public class TradesManager {
             throws StockNotInitializedException {
         Stock stock = this.getStock(stockSymbol);
         Trade trade = new Trade(tradeType, System.currentTimeMillis(), quantity, totalPrice, dividend);
-        StockTradesManager tradesManager = this.tradesMap.get(stock);
+        StockTradesManager tradesManager = this.getStockTradesManager(stock);
 
         tradesManager.addTrade(trade);
     }
@@ -68,9 +68,13 @@ public class TradesManager {
         try {
             lock.lock();
             Stock stock = this.stocksMap.remove(stockSymbol);
+            StockTradesManager stockTradesManager = null;
             if (stock == null) {
                 stock = new Stock();
                 stock.setSymbol(stockSymbol);
+                stockTradesManager = new StockTradesManager();
+            } else {
+                stockTradesManager = this.tradesMap.remove(stock);
             }
 
             stock.setType(stockType);
@@ -78,9 +82,35 @@ public class TradesManager {
             stock.setFixedDividend(fixedDividend);
 
             this.stocksMap.put(stockSymbol, stock);
+            this.tradesMap.put(stock, stockTradesManager);
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * Calculates dividend yield for given stock.
+     * @param stockSymbol Stock symbol
+     * @return Calculated dividend yield
+     * @throws StockNotInitializedException In case that stock doesn't exists
+     */
+    public int calculateDividendYield(String stockSymbol) throws StockNotInitializedException {
+        int dividendYield = 0;
+        Stock stock = this.getStock(stockSymbol);
+        StockTradesManager stockTradesManager = this.getStockTradesManager(stock);
+        Trade lastTrade = stockTradesManager.getLastTrade();
+
+        switch (stock.getType()) {
+            case Preferred:
+                dividendYield = (int)((stock.getFixedDividend() * stock.getParValue()) /
+                                      (float)lastTrade.getSinglePrice());
+                break;
+            default:
+                dividendYield = (int)(lastTrade.getDividend() / (float)lastTrade.getSinglePrice());
+                break;
+        }
+
+        return dividendYield;
     }
 
     /**
@@ -105,5 +135,21 @@ public class TradesManager {
         }
 
         return stock;
+    }
+
+    /**
+     * Get Trades manager by given stock
+     *
+     * @param stock the stock
+     * @return StockTradesManager
+     */
+    private StockTradesManager getStockTradesManager(Stock stock) {
+        Lock lock = this.readWriteLock.readLock();
+        try {
+            lock.lock();
+            return this.tradesMap.get(stock);
+        } finally {
+            lock.unlock();
+        }
     }
 }
