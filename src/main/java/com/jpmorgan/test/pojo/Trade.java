@@ -100,6 +100,26 @@ public class Trade {
      * @return <code>true</code> if Trade is valid, <code>false</code> otherwise
      */
     public boolean validate() {
+        if (this.getTradeType() == null) {
+            return false;
+        }
+
+        if (this.getDateTime() == 0) {
+            return false;
+        }
+
+        if (this.getDividend() <= 0) {
+            return false;
+        }
+
+        if (this.getQuantity() <= 0) {
+            return false;
+        }
+
+        if (this.getTotalPrice() <= 0) {
+            return false;
+        }
+
         return true;
     }
 
