@@ -124,4 +124,27 @@ public class TradesManagerTest {
         dividendYieldExp = 1000/(float)10000;
         assertTrue(dividendYieldCalc == dividendYieldExp);
     }
+
+    @Test
+    public void testCalculatePERatio() throws Exception {
+        this.tradesManager.addTrade(STOCK_SYMBOLS[0], TradeType.buy, 1, 10000, 1000);
+        float peRatioCalc = this.tradesManager.calculatePERatio(STOCK_SYMBOLS[0]);
+        float peRatioExp = 10000 / (float)1000;
+        assertTrue(peRatioCalc == peRatioExp);
+    }
+
+    @Test
+    public void testCalculateGBCEAllSharesIndex() throws Exception {
+        // zero
+        assertTrue(0.0 == this.tradesManager.calculateGBCEAllSharesIndex());
+
+        // Add trades to all STOCKS
+        for (int i = 0; i < STOCK_SYMBOLS.length; i++) {
+            String stockSymbol = STOCK_SYMBOLS[i];
+            this.tradesManager.addTrade(stockSymbol, TradeType.buy, 1, (i+1)*1000, 1000);
+        }
+
+        double gbce = this.tradesManager.calculateGBCEAllSharesIndex();
+        assertEquals(gbce, 3380.01516, 0.0001);
+    }
 }
